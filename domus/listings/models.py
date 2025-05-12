@@ -19,15 +19,44 @@ class Property(models.Model):
 class Page(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
-    cotent = models.TextField()
+    content = models.TextField()
     is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_visible = models.BooleanField(default=True)
 
     
     def __str__(self):
         return self.title
     
+
+class BlogPost(models.Model):
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True)
+    content = models.TextField()
+    image = models.ImageField(upload_to='blog/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_published = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+    
+
+
+
+class Menu(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    page = models.ForeignKey(Page, on_delete=models.SET_NULL, null=True, blank=True)
+    url = models.URLField(blank=True, null=True)
+    order = models.PositiveIntegerField(default=0)
+    visible = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+    
+
+
     
 
 
