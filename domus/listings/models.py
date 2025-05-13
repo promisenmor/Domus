@@ -1,4 +1,6 @@
 from django.db import models
+from django_ckeditor_5.fields import CKEditor5Field
+
 
 class Property(models.Model):
     title = models.CharField(max_length=255)
@@ -19,7 +21,7 @@ class Property(models.Model):
 class Page(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
-    content = models.TextField()
+    content = CKEditor5Field('Content', config_name='default')
     is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -33,7 +35,7 @@ class Page(models.Model):
 class BlogPost(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
-    content = models.TextField()
+    content = CKEditor5Field('Content', config_name='default')
     image = models.ImageField(upload_to='blog/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_published = models.BooleanField(default=True)
