@@ -4,8 +4,8 @@ from . models import  *
 
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):
-    list_display = ('title', 'price', 'location', 'is_published', 'updated_at')
-    list_filter = ('is_published', 'location',)
+    list_display = ('title', 'price', 'location', 'is_published', 'updated_at', 'is_crm_synced')
+    list_filter = ('is_published', 'location', 'is_crm_synced')
     search_fields = ('title', 'location')
 
 @admin.register(BlogPost)

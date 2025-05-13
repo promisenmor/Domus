@@ -12,6 +12,7 @@ class Property(models.Model):
     is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
+    is_crm_synced = models.BooleanField(default=False)
 
 
     def __str__(self):
