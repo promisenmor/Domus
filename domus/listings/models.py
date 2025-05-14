@@ -13,6 +13,7 @@ class Property(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
     is_crm_synced = models.BooleanField(default=False)
+    manual_overide = models.BooleanField(default=False)
 
 
     def __str__(self):
