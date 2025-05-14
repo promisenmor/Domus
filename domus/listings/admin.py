@@ -7,7 +7,7 @@ class PropertyAdmin(admin.ModelAdmin):
     list_display = ('title', 'price', 'location', 'is_published', 'updated_at', 'is_crm_synced', 'manual_override')
     list_filter = ('is_published', 'location', 'is_crm_synced')
     search_fields = ('title', 'location')
-    list_editable = ('is_published', 'manual_overide')
+    list_editable = ('is_published', 'manual_override')
 
 
 @admin.register(BlogPost)
