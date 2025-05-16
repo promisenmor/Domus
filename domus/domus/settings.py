@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django_ckeditor_5',
     'rest_framework',
     'django_filters',
+    'content',
 ]
 
 MIDDLEWARE = [
