@@ -19,6 +19,20 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 import django_ckeditor_5
+from django.contrib.sitemaps.views import sitemap
+from listings.sitemaps import PropertySitemap
+from django.http import HttpResponse
+
+def robots_txt(request):
+    return HttpResponse("User-Agent: *\nDisallow:", content_type="text/plain")
+
+
+sitemaps = {
+    'properties' : PropertySitemap,
+}
+
+
+
 
 
 urlpatterns = [
@@ -26,8 +40,8 @@ urlpatterns = [
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     path('', include('listings.urls')),
     path('', include('content.urls')),
-
-    
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemaps'),
+    path("robots.txt", robots_txt),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
