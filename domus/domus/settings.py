@@ -26,6 +26,9 @@ SECRET_KEY = 'django-insecure-m^+bw4rbqu=lxrw@wu5e-=@!-in1_^s##jjgdg8o)3qmc5f)os
 DEBUG = True
 
 import os
+from datetime import timedelta
+
+
 
 ALLOWED_HOSTS = []
 
@@ -156,6 +159,17 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME' : timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME' : timedelta(days=1),
 }
 
 
