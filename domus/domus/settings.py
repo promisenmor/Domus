@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'listings',
+    'account',
     'django_ckeditor_5',
     'rest_framework',
     'django_filters',
@@ -190,5 +191,9 @@ USE_I18N = True
 USE_L10N  = True
 
 LOCAL_PATHS = [BASE_DIR / 'locale']
+
+AUTH_USER_MODEL = 'account.User'
+
+
 
 
