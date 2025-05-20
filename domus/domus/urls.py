@@ -22,6 +22,8 @@ import django_ckeditor_5
 from django.contrib.sitemaps.views import sitemap
 from listings.sitemaps import PropertySitemap
 from django.http import HttpResponse
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 
 def robots_txt(request):
     return HttpResponse("User-Agent: *\nDisallow:", content_type="text/plain")
@@ -42,6 +44,9 @@ urlpatterns = [
     path('', include('content.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemaps'),
     path("robots.txt", robots_txt),
+
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh_view'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_view'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
