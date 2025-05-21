@@ -31,3 +31,9 @@ class MenuAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     list_editable = ('order', 'visible')
 
+
+
+
+admin.site.site_header = "Domus Admin"
+admin.site.site_title = "Domus Dashboard"
+admin.site.index_title = "Welcome to Domus Admin Panel"

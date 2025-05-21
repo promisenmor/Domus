@@ -1,0 +1,15 @@
+from django.contrib.admin.sites import AdminSite
+from django.contrib import admin
+
+class DomusAdminSite(AdminSite):
+    site_header = "Domus Admin"
+    site_title = "Domus Dashboard"
+    index_title = "Welcome to Domus Admin Panel"
+
+    def each_context(self, request):
+        context = super().each_context(request)
+        context['custom_css'] = 'css/admin/custom.css'
+        return context
+
+admin.site = DomusAdminSite()
+admin.autodiscover()
