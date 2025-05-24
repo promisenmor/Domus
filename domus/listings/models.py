@@ -1,5 +1,7 @@
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
+from django.conf import settings
+
 
 
 class Property(models.Model):
@@ -14,6 +16,7 @@ class Property(models.Model):
     updated_at = models.DateField(auto_now=True)
     is_crm_synced = models.BooleanField(default=False)
     manual_override = models.BooleanField(default=False)
+    agent = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='listings', limit_choices_to={"role": "AGENT"}, null=True, blank=True)
 
 
     def __str__(self):

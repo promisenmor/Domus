@@ -186,7 +186,16 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+
+    'DEFAULT_THROTTLE_CLASS': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '1000/day',
+        'annon': '100/day'
+    }
 }
 
 
