@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from listings.models import Property
 
 User = get_user_model()
 
@@ -27,3 +28,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             return user
         
     
+class SavedListingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Property
+        fields = ['id', 'title', 'price', 'location', 'image']

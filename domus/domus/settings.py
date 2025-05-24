@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'content',
     'django.contrib.sitemaps',
     'compressor',
+    'dashboard',
 ]
 
 MIDDLEWARE = [
