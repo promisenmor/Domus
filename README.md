@@ -34,4 +34,27 @@ A scalable real estate web application built with Django, designed to manage ove
 ---
 
 ## 📁 Project Structure
+domus/
+├── account/ # Custom user model and auth
+├── listing/ # Core property listing logic
+├── core/ # Pages, menus, blog, global utilities
+├── media/ # Uploaded media files
+├── static/ # Static files (CSS/JS)
+└── domus/ # Project settings & URLs
+
+## 🧑‍💻 Contributing
+Fork the repo
+
+Create a feature branch: git checkout -b feature/YourFeature
+
+Commit your changes: git commit -m 'Add something'
+
+Push to the branch: git push origin feature/YourFeature
+
+Open a Pull Request
+
+
+## 👨‍💼 Author
+Promise Nmor
+Backend Developer | Django | Python
 
