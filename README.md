@@ -23,7 +23,7 @@ A scalable real estate web application built with Django, designed to manage ove
 ## 🛠 Tech Stack
 
 - **Backend**: Django, Django REST Framework  
-- **Database**: SQLite (for development)  
+- **Database**: postgres 
 - **Auth**: Custom User Model, JWT  
 - **Admin Panel**: Custom, unified interface using Django Tailwind  
 - **Rich Text**: CKEditor 5 for blog/pages  
