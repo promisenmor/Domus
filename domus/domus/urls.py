@@ -23,6 +23,11 @@ from django.contrib.sitemaps.views import sitemap
 from listings.sitemaps import PropertySitemap
 from django.http import HttpResponse
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 
 def robots_txt(request):
@@ -49,6 +54,9 @@ urlpatterns = [
 
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh_view'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_view'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -10,11 +10,11 @@ class BlogPostSerializer(serializers.ModelSerializer):
 
 class PageSerializer(serializers.ModelSerializer):
     class Meta:
-        models = Page
+        model = Page
         fields = '__all__'
 
 class MenuItemSerializer(serializers.ModelSerializer):
     class Meta:
-        models = MenuItem
+        model = MenuItem
         fields = '__all__'
 

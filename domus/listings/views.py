@@ -13,6 +13,8 @@ class AgentListingViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsAgentAndOwner]
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Property.objects.none()
         return Property.objects.filter(agent=self.request.user)
     
     def perform_create(self, serializer):

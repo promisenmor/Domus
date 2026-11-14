@@ -28,8 +28,40 @@ A scalable real estate web application built with Django, designed to manage ove
 - **Admin Panel**: Custom, unified interface using Django Tailwind  
 - **Rich Text**: CKEditor 5 for blog/pages  
 - **Tasks**: Celery + Redis (optional)  
-- **Containerization**: Docker-ready (in progress)  
+- **Containerization**: Docker Compose with Django and PostgreSQL
 - **Deployment Target**: Heroku / AWS / VPS
+
+## 🚀 Getting Started
+
+### Docker
+
+Copy `.env.example` to `.env`, set a unique `DJANGO_SECRET_KEY` and database password, then start the application:
+
+```powershell
+Copy-Item .env.example .env
+docker compose up --build
+```
+
+The web container applies database migrations on startup. The API will be available at `http://localhost:8000/`.
+
+### API documentation
+
+- Swagger UI: `http://localhost:8000/api/docs/`
+- ReDoc: `http://localhost:8000/api/redoc/`
+- OpenAPI schema: `http://localhost:8000/api/schema/`
+
+The schema documents the existing listing, account, content, and JWT endpoints.
+
+### Local development
+
+Install dependencies from the repository root with `pip install -r requirements.txt`, then run:
+
+```powershell
+python manage.py migrate
+python manage.py runserver
+```
+
+SQLite is used locally unless `DB_HOST` is set; Docker Compose configures PostgreSQL.
 
 ---
 

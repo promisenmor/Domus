@@ -4,6 +4,8 @@ from rest_framework import generics, status
 from .serializers import UserRegistrationSerializer, SavedListingSerializer
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import serializers
+from drf_spectacular.utils import extend_schema, inline_serializer
 from listings.models import Property
 from rest_framework.views import APIView
 
@@ -24,12 +26,29 @@ class RegisterUserAPIView(generics.CreateAPIView):
 
 class SavedListingAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
+    @extend_schema(responses=SavedListingSerializer(many=True))
     def get(self, request):
         listings = request.user.saved_listings.all()
         serializer = SavedListingSerializer(listings, many=True)
         return Response(serializer.data)
-    
+
+    @extend_schema(
+        request=inline_serializer(
+            name='SavedListingRequest',
+            fields={'listing_id': serializers.IntegerField()},
+        ),
+        responses={
+            200: inline_serializer(
+                name='SavedListingAdded',
+                fields={'message': serializers.CharField()},
+            ),
+            404: inline_serializer(
+                name='SavedListingNotFound',
+                fields={'message': serializers.CharField()},
+            ),
+        },
+    )
     def post(self, request):
         listing_id = request.data.get('listing_id')
         try:
@@ -39,6 +58,22 @@ class SavedListingAPIView(APIView):
         except Property.DoesNotExist:
             return Response({"message": "Listing not found"}, status=404)
 
+    @extend_schema(
+        request=inline_serializer(
+            name='SavedListingRemovalRequest',
+            fields={'listing_id': serializers.IntegerField()},
+        ),
+        responses={
+            200: inline_serializer(
+                name='SavedListingRemoved',
+                fields={'message': serializers.CharField()},
+            ),
+            404: inline_serializer(
+                name='SavedListingRemovalNotFound',
+                fields={'error': serializers.CharField()},
+            ),
+        },
+    )
     def delete(self, request):
         listing_id = request.data.get('listing_id')
         try:

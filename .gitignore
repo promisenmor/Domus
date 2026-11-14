@@ -1,2 +1,11 @@
 venv
 staticfiles
+.env
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+media/
+
+.env.example
+*.pot
