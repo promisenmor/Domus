@@ -42,7 +42,7 @@ Copy-Item .env.example .env
 docker compose up --build
 ```
 
-The web container applies database migrations on startup. The API will be available at `http://localhost:8000/`.
+The web container applies database migrations on startup. The API and Celery worker run alongside PostgreSQL and Redis. The API will be available at `http://localhost:8000/`.
 
 ### API documentation
 
@@ -51,6 +51,25 @@ The web container applies database migrations on startup. The API will be availa
 - OpenAPI schema: `http://localhost:8000/api/schema/`
 
 The schema documents the existing listing, account, content, and JWT endpoints.
+
+The authentication API provides:
+
+- `POST /api/register/` with `full_name`, `email`, and `password` (creates an unverified client account and queues a welcome email containing a verification link).
+- `POST /api/auth/email/verify/` with the verification `token` from the welcome email.
+- `POST /api/auth/email/verification/resend/` with `email` to resend an expired/missing verification email.
+- `POST /api/auth/login/` with `email` and `password` (returns JWT access and refresh tokens).
+- `POST /api/auth/logout/` with the authenticated user's `refresh` token (blacklists that refresh token).
+- `POST /api/token/refresh/` with a refresh token to rotate tokens.
+- `POST /api/auth/password/change/` with `current_password` and `new_password`.
+- `POST /api/auth/password/forgot/` with `email`.
+- `POST /api/auth/password/reset/` with `uid`, `token`, and `new_password`.
+- `GET/PATCH /api/me/` for the authenticated profile.
+
+Welcome and password-reset emails are queued through Celery. The default development email backend prints messages in worker logs; configure `EMAIL_BACKEND`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, and `EMAIL_USE_TLS` in `.env` for SMTP. Set `FRONTEND_BASE_URL` to the frontend origin to create password-reset links.
+New accounts must verify their email before login; verification links expire after 24 hours by default. Existing accounts remain verified during migration. Email changes are read-only on `/api/me/` until a verification flow for changing addresses is added.
+Logout invalidates the refresh token; an already-issued access token remains valid until its short expiry.
+
+The initial listings API includes public published-property search and detail endpoints. Agent listing writes are restricted to agents and new agent listings remain unpublished until staff review.
 
 ### Local development
 

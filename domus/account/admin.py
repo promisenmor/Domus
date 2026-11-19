@@ -4,7 +4,10 @@ from .models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'role', 'is_staff')
-    list_filter = ('role', 'is_staff', 'is_superuser')
+    fieldsets = UserAdmin.fieldsets + (
+        ('Verification', {'fields': ('is_verified',)}),
+    )
+    list_display = ('username', 'email', 'role', 'is_staff', 'is_verified')
+    list_filter = ('role', 'is_staff', 'is_superuser', 'is_verified')
 
     

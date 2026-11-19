@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from listings.models import Property
 
 
 class User(AbstractUser):
@@ -12,6 +11,7 @@ class User(AbstractUser):
     )
 
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='CLIENT')
+    is_verified = models.BooleanField(default=True)
     phone_number = models.CharField(max_length=15, blank=True)
     company = models.CharField(max_length=255, blank=True)
     license_number = models.CharField(max_length=50, blank=True)

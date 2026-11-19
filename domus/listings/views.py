@@ -4,8 +4,11 @@ from .models import Property
 from .serializers import PropertySerializers
 
 class IsAgentAndOwner(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'AGENT'
+
     def has_object_permission(self, request, view, obj):
-        return request.user.role == 'AGENT' and obj.agent == request.user
+        return obj.agent == request.user
     
 
 class AgentListingViewSet(viewsets.ModelViewSet):

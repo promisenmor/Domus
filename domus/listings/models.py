@@ -11,7 +11,7 @@ class Property(models.Model):
     location = models.CharField(max_length=255)
     image = models.ImageField(upload_to='properties/', null=True, blank=True)
     crm_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
-    is_published = models.BooleanField(default=True)
+    is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
     is_crm_synced = models.BooleanField(default=False)
