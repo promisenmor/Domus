@@ -6,7 +6,7 @@ class PropertySitemap(Sitemap):
     priority = 0.9 
 
     def items(self):
-        return Property.objects.filter(is_published=True)
+        return Property.objects.filter(status=Property.Status.PUBLISHED, is_published=True)
     
     def location(self, obj):
         return f"/properties/{obj.slug}/"

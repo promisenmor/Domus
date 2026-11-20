@@ -110,3 +110,111 @@ class ListingAPITests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_agent_can_submit_listing_but_staff_must_publish_it(self):
+        agent = User.objects.create_user(
+            username="workflow-agent",
+            password="strongpassword123",
+            role="AGENT",
+        )
+        listing = Property.objects.create(
+            title="Workflow Listing",
+            description="Awaiting moderation",
+            price=300000,
+            location="Abuja",
+            agent=agent,
+        )
+        self.client.force_authenticate(user=agent)
+
+        submit_response = self.client.post(
+            reverse("agent-listing-submit", kwargs={"pk": listing.pk})
+        )
+
+        self.assertEqual(submit_response.status_code, status.HTTP_200_OK)
+        listing.refresh_from_db()
+        self.assertEqual(listing.status, Property.Status.PENDING_REVIEW)
+        self.assertFalse(listing.is_published)
+
+        staff = User.objects.create_user(
+            username="reviewer",
+            password="strongpassword123",
+            role="STAFF",
+        )
+        self.client.force_authenticate(user=staff)
+
+        approve_response = self.client.post(
+            reverse("staff-listing-approve", kwargs={"pk": listing.pk})
+        )
+
+        self.assertEqual(approve_response.status_code, status.HTTP_200_OK)
+        listing.refresh_from_db()
+        self.assertEqual(listing.status, Property.Status.PUBLISHED)
+        self.assertTrue(listing.is_published)
+        self.assertIsNotNone(listing.published_at)
+
+    def test_public_search_supports_listing_and_property_filters(self):
+        Property.objects.create(
+            title="Three Bedroom Flat",
+            description="Modern apartment",
+            price=450000,
+            location="Lekki",
+            city="Lagos",
+            postcode="105102",
+            property_type=Property.PropertyType.APARTMENT,
+            listing_type=Property.ListingType.FOR_SALE,
+            bedrooms=3,
+            is_published=True,
+        )
+        Property.objects.create(
+            title="Studio Flat",
+            description="Small apartment",
+            price=220000,
+            location="Ikeja",
+            city="Lagos",
+            property_type=Property.PropertyType.APARTMENT,
+            listing_type=Property.ListingType.TO_RENT,
+            bedrooms=1,
+            is_published=True,
+        )
+
+        response = self.client.get(
+            reverse("property-list-api"),
+            {"city": "Lagos", "bedrooms": 3, "property_type": "APARTMENT"},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["title"], "Three Bedroom Flat")
+
+    def test_public_search_supports_price_and_room_ranges(self):
+        Property.objects.create(
+            title="Budget Apartment",
+            description="Within range",
+            price=300000,
+            location="Yaba",
+            city="Lagos",
+            bedrooms=2,
+            bathrooms=1,
+            is_published=True,
+        )
+        Property.objects.create(
+            title="Luxury Apartment",
+            description="Outside range",
+            price=900000,
+            location="Victoria Island",
+            city="Lagos",
+            bedrooms=4,
+            bathrooms=3,
+            is_published=True,
+        )
+
+        response = self.client.get(reverse("property-list-api"), {
+            "min_price": "250000",
+            "max_price": "500000",
+            "min_bedrooms": "2",
+            "min_bathrooms": "1",
+        })
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["title"], "Budget Apartment")

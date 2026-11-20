@@ -9,6 +9,7 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from .serializers import (
     EmailLoginSerializer,
     EmailVerificationSerializer,
@@ -229,11 +230,38 @@ class PasswordResetConfirmAPIView(generics.GenericAPIView):
 class SavedListingAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def _require_client(self, request):
+        return request.user.role == 'CLIENT'
+
+    def _get_paginated_saved_listings(self, request, listings):
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(listings, request, view=self)
+        if page is not None:
+            return paginator.get_paginated_response(
+                SavedListingSerializer(page, many=True).data
+            )
+        return Response(SavedListingSerializer(listings, many=True).data)
+
     @extend_schema(responses=SavedListingSerializer(many=True))
     def get(self, request):
-        listings = request.user.saved_listings.all()
-        serializer = SavedListingSerializer(listings, many=True)
-        return Response(serializer.data)
+        if not self._require_client(request):
+            return Response(
+                {'detail': 'Only clients can manage saved listings.'},
+                status=403,
+            )
+        listing_id = request.query_params.get('listing_id')
+        if listing_id:
+            try:
+                listing = request.user.saved_listings.get(pk=listing_id)
+                return Response({'is_saved': True, 'listing_id': listing.pk})
+            except (Property.DoesNotExist, ValueError, TypeError):
+                return Response({'is_saved': False, 'listing_id': listing_id})
+
+        listings = request.user.saved_listings.filter(
+            status=Property.Status.PUBLISHED,
+            is_published=True,
+        ).select_related('agent').prefetch_related('images').order_by('-created_at', '-pk')
+        return self._get_paginated_saved_listings(request, listings)
 
     @extend_schema(
         request=inline_serializer(
@@ -252,12 +280,25 @@ class SavedListingAPIView(APIView):
         },
     )
     def post(self, request):
+        if not self._require_client(request):
+            return Response(
+                {'detail': 'Only clients can manage saved listings.'},
+                status=403,
+            )
         listing_id = request.data.get('listing_id')
         try:
-            listing = Property.objects.get(id=listing_id)
+            listing = Property.objects.get(
+                id=listing_id,
+                status=Property.Status.PUBLISHED,
+                is_published=True,
+            )
+            if request.user.saved_listings.filter(pk=listing.pk).exists():
+                return Response({"message": "Listing is already saved."})
             request.user.saved_listings.add(listing)
             return Response({"message": "Listing added to favourites. "})
         except Property.DoesNotExist:
+            return Response({"message": "Listing not found"}, status=404)
+        except (ValueError, TypeError):
             return Response({"message": "Listing not found"}, status=404)
 
     @extend_schema(
@@ -277,10 +318,21 @@ class SavedListingAPIView(APIView):
         },
     )
     def delete(self, request):
+        if not self._require_client(request):
+            return Response(
+                {'detail': 'Only clients can manage saved listings.'},
+                status=403,
+            )
         listing_id = request.data.get('listing_id')
         try:
-            listing = Property.objects.get(id=listing_id)
+            listing = Property.objects.get(
+                id=listing_id,
+                status=Property.Status.PUBLISHED,
+                is_published=True,
+            )
             request.user.saved_listings.remove(listing)
             return Response({"message": "This Listing has been removed from your favourites. "})
         except Property.DoesNotExist:
+            return Response({"error": "Listing not found. "}, status=404)
+        except (ValueError, TypeError):
             return Response({"error": "Listing not found. "}, status=404)

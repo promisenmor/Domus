@@ -247,4 +247,4 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class SavedListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Property
-        fields = ['id', 'title', 'price', 'location', 'image']
+        fields = ['id', 'title', 'slug', 'price', 'location', 'city', 'image']

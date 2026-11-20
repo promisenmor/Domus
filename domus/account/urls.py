@@ -23,5 +23,6 @@ urlpatterns = [
     path('api/auth/password/forgot/', ForgotPasswordAPIView.as_view(), name='password-forgot'),
     path('api/auth/password/reset/', PasswordResetConfirmAPIView.as_view(), name='password-reset'),
     path('saved-listing/', SavedListingAPIView.as_view(), name='saved-listings'),
+    path('api/saved-listings/', SavedListingAPIView.as_view(), name='saved-listings-api'),
 ]
 

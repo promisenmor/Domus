@@ -4,10 +4,11 @@ from . models import  *
 
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):
-    list_display = ('title', 'price', 'location', 'is_published', 'updated_at', 'is_crm_synced', 'manual_override')
-    list_filter = ('is_published', 'location', 'is_crm_synced')
-    search_fields = ('title', 'location')
-    list_editable = ('is_published', 'manual_override')
+    list_display = ('title', 'status', 'price', 'city', 'agent', 'featured', 'is_published', 'updated_at', 'source')
+    list_filter = ('status', 'property_type', 'listing_type', 'city', 'is_published', 'featured', 'source')
+    search_fields = ('title', 'slug', 'location', 'city', 'postcode', 'reference_number', 'external_id')
+    prepopulated_fields = {'slug': ('title',)}
+    list_editable = ('featured',)
 
 
 @admin.register(BlogPost)

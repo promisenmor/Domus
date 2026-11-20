@@ -18,6 +18,7 @@ from account.tasks import (
     send_welcome_email,
 )
 from account.tokens import make_email_verification_token
+from listings.models import Property
 
 User = get_user_model()
 
@@ -292,6 +293,66 @@ class AuthLifecycleTests(APITestCase):
         self.assertEqual(known_response.status_code, status.HTTP_202_ACCEPTED)
         self.assertEqual(known_response.data, unknown_response.data)
         send_verification.assert_called_once_with(self.user.pk)
+
+
+class SavedListingsTests(APITestCase):
+    def setUp(self):
+        self.client_user = User.objects.create_user(
+            username='saved-client',
+            email='saved@example.com',
+            password='strongpassword123',
+            role='CLIENT',
+        )
+        self.published = Property.objects.create(
+            title='Saved Apartment',
+            description='A published property',
+            price=400000,
+            location='Lagos',
+            status=Property.Status.PUBLISHED,
+            is_published=True,
+        )
+        self.draft = Property.objects.create(
+            title='Draft Apartment',
+            description='Not published',
+            price=300000,
+            location='Lagos',
+            status=Property.Status.DRAFT,
+            is_published=False,
+        )
+
+    def test_client_can_save_check_remove_and_cannot_save_drafts(self):
+        self.client.force_authenticate(user=self.client_user)
+        url = reverse('saved-listings-api')
+
+        first = self.client.post(url, {'listing_id': self.published.pk})
+        duplicate = self.client.post(url, {'listing_id': self.published.pk})
+        checked = self.client.get(url, {'listing_id': self.published.pk})
+        listing_response = self.client.get(url)
+        removed = self.client.delete(url, {'listing_id': self.published.pk})
+        draft = self.client.post(url, {'listing_id': self.draft.pk})
+
+        self.assertEqual(first.status_code, status.HTTP_200_OK)
+        self.assertEqual(duplicate.status_code, status.HTTP_200_OK)
+        self.assertTrue(checked.data['is_saved'])
+        self.assertEqual(listing_response.data['count'], 1)
+        self.assertEqual(removed.status_code, status.HTTP_200_OK)
+        self.assertEqual(draft.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertFalse(self.client_user.saved_listings.filter(pk=self.published.pk).exists())
+
+    def test_non_client_cannot_manage_saved_listings(self):
+        agent = User.objects.create_user(
+            username='saved-agent',
+            password='strongpassword123',
+            role='AGENT',
+        )
+        self.client.force_authenticate(user=agent)
+
+        response = self.client.post(
+            reverse('saved-listings-api'),
+            {'listing_id': self.published.pk},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class UserEmailTaskTests(TestCase):
