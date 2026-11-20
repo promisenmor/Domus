@@ -238,6 +238,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'phone_number',
             'company',
             'license_number',
+            'biography',
+            'profile_picture',
+            'email_notifications',
             'role',
             'is_verified',
         ]

@@ -15,6 +15,9 @@ class User(AbstractUser):
     phone_number = models.CharField(max_length=15, blank=True)
     company = models.CharField(max_length=255, blank=True)
     license_number = models.CharField(max_length=50, blank=True)
+    biography = models.TextField(blank=True)
+    profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
+    email_notifications = models.BooleanField(default=True)
 
 
     saved_listings = models.ManyToManyField('listings.Property', blank=True)

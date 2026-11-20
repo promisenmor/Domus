@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from . models import Property
-from .models import ListingImage
+from .models import ListingImage, Enquiry
 
 
 class ListingImageSerializer(serializers.ModelSerializer):
@@ -93,4 +93,25 @@ class PublicPropertySerializer(serializers.ModelSerializer):
             'image', 'images', 'created_at', 'published_at',
         ]
         read_only_fields = fields
+
+
+class EnquirySerializer(serializers.ModelSerializer):
+    property_title = serializers.CharField(source='property.title', read_only=True)
+
+    class Meta:
+        model = Enquiry
+        fields = [
+            'id', 'property', 'property_title', 'client', 'assigned_agent',
+            'name', 'email', 'phone_number', 'message', 'status',
+            'internal_notes', 'follow_up_at', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'id', 'property_title', 'client', 'assigned_agent',
+            'created_at', 'updated_at',
+        ]
+
+    def validate_property(self, listing):
+        if listing.status != Property.Status.PUBLISHED or not listing.is_published:
+            raise serializers.ValidationError('Enquiries can only be submitted for published listings.')
+        return listing
 

@@ -1,11 +1,18 @@
 from django.shortcuts import render
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
-from .models import Property, ListingImage
-from .serializers import PropertySerializers, ListingImageSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import mixins
+from rest_framework.permissions import AllowAny
+from .models import Property, ListingImage, Enquiry
+from .serializers import (
+    PropertySerializers,
+    ListingImageSerializer,
+    EnquirySerializer,
+)
 
 class IsAgentAndOwner(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -103,6 +110,43 @@ class ListingImageViewSet(viewsets.ModelViewSet):
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied('You can only upload images for your own listings.')
         serializer.save(property=listing)
+
+
+class EnquiryCreateAPIView(generics.CreateAPIView):
+    serializer_class = EnquirySerializer
+    permission_classes = [AllowAny]
+
+    def perform_create(self, serializer):
+        listing = serializer.validated_data['property']
+        client = self.request.user if self.request.user.is_authenticated else None
+        serializer.save(
+            client=client,
+            assigned_agent=listing.agent,
+        )
+
+
+class AgentEnquiryViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
+    serializer_class = EnquirySerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status']
+
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Enquiry.objects.none()
+        user = self.request.user
+        if user.role in ('STAFF', 'ADMIN') or user.is_superuser:
+            return Enquiry.objects.all().select_related('property', 'client', 'assigned_agent')
+        if user.role != 'AGENT':
+            return Enquiry.objects.none()
+        return Enquiry.objects.filter(
+            assigned_agent=user,
+        ).select_related('property', 'client', 'assigned_agent')
 
     @action(detail=True, methods=['post'])
     def archive(self, request, pk=None):
