@@ -20,7 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 import django_ckeditor_5
 from django.contrib.sitemaps.views import sitemap
-from listings.sitemaps import PropertySitemap
+from listings.sitemaps import BlogPostSitemap, PageSitemap, PropertySitemap
 from django.http import HttpResponse
 from rest_framework_simplejwt.views import TokenRefreshView
 from drf_spectacular.views import (
@@ -31,11 +31,17 @@ from drf_spectacular.views import (
 
 
 def robots_txt(request):
-    return HttpResponse("User-Agent: *\nDisallow:", content_type="text/plain")
+    sitemap_url = request.build_absolute_uri('/sitemap.xml')
+    return HttpResponse(
+        f"User-Agent: *\nDisallow:\nSitemap: {sitemap_url}\n",
+        content_type="text/plain",
+    )
 
 
 sitemaps = {
-    'properties' : PropertySitemap,
+    'properties': PropertySitemap,
+    'pages': PageSitemap,
+    'blog': BlogPostSitemap,
 }
 
 
@@ -50,7 +56,7 @@ urlpatterns = [
     path('', include('account.urls')),
     path('', include('dashboard.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemaps'),
-    path("robots.txt", robots_txt),
+    path("robots.txt", robots_txt, name="robots-txt"),
 
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh_view'),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

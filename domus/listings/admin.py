@@ -1,5 +1,5 @@
 from django.contrib import admin
-from . models import  *
+from .models import Enquiry, ListingImage, Property
 
 
 @admin.register(Property)
@@ -11,28 +11,19 @@ class PropertyAdmin(admin.ModelAdmin):
     list_editable = ('featured',)
 
 
-@admin.register(BlogPost)
-class BlogPostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'is_published', 'created_at')
-    prepopulated_fields = {"slug": ("title", )}
-    search_fields = ('title', 'content')
-    list_filter = ('is_published',)
+@admin.register(ListingImage)
+class ListingImageAdmin(admin.ModelAdmin):
+    list_display = ('property', 'caption', 'is_primary', 'order')
+    list_filter = ('is_primary',)
+    search_fields = ('property__title', 'caption', 'alt_text')
 
 
-@admin.register(Page)
-class PageAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'is_visible')
-    prepopulated_fields = {"slug": ("title",)}
-    search_fields = ('title', 'content')
-
-
-@admin.register(Menu)
-class MenuAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'page', 'url', 'order', 'visible')
-    prepopulated_fields = {"slug": ("name",)}
-    list_editable = ('order', 'visible')
-
-
+@admin.register(Enquiry)
+class EnquiryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'property', 'assigned_agent', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('name', 'email', 'property__title')
+    readonly_fields = ('created_at', 'updated_at')
 
 
 admin.site.site_header = "Domus Admin"

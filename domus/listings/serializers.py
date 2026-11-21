@@ -90,7 +90,8 @@ class PublicPropertySerializer(serializers.ModelSerializer):
             'longitude', 'property_type', 'listing_type', 'bedrooms', 'bathrooms',
             'reception_rooms', 'parking', 'garden', 'balcony', 'furnished',
             'currency', 'price_frequency', 'reference_number', 'featured',
-            'image', 'images', 'created_at', 'published_at',
+            'image', 'images', 'meta_title', 'meta_description', 'canonical_url',
+            'created_at', 'published_at',
         ]
         read_only_fields = fields
 
