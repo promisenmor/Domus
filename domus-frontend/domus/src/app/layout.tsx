@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { DM_Sans, Lora } from "next/font/google";
+import { DM_Sans, DM_Serif_Display } from "next/font/google";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -7,9 +8,10 @@ const dmSans = DM_Sans({
   subsets: ["latin"],
 });
 
-const lora = Lora({
-  variable: "--font-lora",
+const dmSerif = DM_Serif_Display({
+  variable: "--font-dm-serif",
   subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -22,9 +24,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${lora.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${dmSerif.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try { var theme = localStorage.getItem("domus-theme"); if (theme === "dark" || theme === "light") document.documentElement.dataset.theme = theme; } catch (_) {}`,
+          }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }
