@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Domus frontend
 
-## Getting Started
+The Domus frontend is a Next.js application that consumes the Django API in the repository root.
 
-First, run the development server:
+## Local development
 
-```bash
+1. Start the Django API from the repository root at `http://localhost:8000`.
+2. Copy `env.local.example` to `.env.local`.
+3. Install dependencies and start Next.js:
+
+```powershell
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The frontend is available at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Client accounts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Phase 2 provides client registration, email verification, sign in, password recovery, a client dashboard, saved properties, enquiry history, profile editing, and account settings.
 
-## Learn More
+The browser communicates with same-origin Next.js API routes. The API routes call Django and keep JWT access and refresh tokens in HttpOnly cookies; credentials are not stored in browser local storage. Email verification and password recovery links are sent by the backend, so the Django email/Celery configuration must be enabled for those flows.
 
-To learn more about Next.js, take a look at the following resources:
+The backend endpoints used by this phase are documented in the root `README.md`. Frontend route handlers currently target those existing `/api/...` endpoints.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Validation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```powershell
+npm run lint
+npm run build
+```

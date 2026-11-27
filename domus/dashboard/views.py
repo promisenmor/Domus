@@ -58,12 +58,22 @@ class ClientDashboardView(APIView):
         saved = request.user.saved_listings.filter(
             status=Property.Status.PUBLISHED,
             is_published=True,
-        ).order_by('-created_at', '-pk')[:10]
-        enquiries = Enquiry.objects.filter(client=request.user).select_related('property')[:20]
+        ).order_by('-created_at', '-pk')
+        saved_count = saved.count()
+        enquiries = Enquiry.objects.filter(client=request.user).select_related('property')
+        enquiry_count = enquiries.count()
+        active_enquiry_count = enquiries.exclude(
+            status__in=[Enquiry.Status.CLOSED, Enquiry.Status.SPAM]
+        ).count()
         return Response({
             "profile": UserProfileSerializer(request.user).data,
+            "overview": {
+                "saved_properties": saved_count,
+                "total_enquiries": enquiry_count,
+                "active_enquiries": active_enquiry_count,
+            },
             "saved_listings": PublicPropertySerializer(
-                saved,
+                saved[:10],
                 many=True,
                 context={'request': request},
             ).data,
@@ -76,6 +86,6 @@ class ClientDashboardView(APIView):
                     "created_at": enquiry.created_at,
                     "updated_at": enquiry.updated_at,
                 }
-                for enquiry in enquiries
+                for enquiry in enquiries[:20]
             ],
         })
