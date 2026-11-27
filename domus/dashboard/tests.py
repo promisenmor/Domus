@@ -68,6 +68,43 @@ class DashboardAndEnquiryTests(APITestCase):
         self.assertEqual(dashboard.status_code, status.HTTP_200_OK)
         self.assertEqual(len(dashboard.data['enquiries']), 1)
         self.assertEqual(dashboard.data['enquiries'][0]['status'], Enquiry.Status.NEW)
+        self.assertEqual(dashboard.data['overview']['total_enquiries'], 1)
+        self.assertEqual(dashboard.data['overview']['active_enquiries'], 1)
+        self.assertEqual(dashboard.data['overview']['saved_properties'], 0)
+
+    def test_client_dashboard_counts_all_items_beyond_recent_item_limits(self):
+        extra_listings = [
+            Property.objects.create(
+                title=f'Saved Listing {index}',
+                description='Saved listing for dashboard count tests',
+                price=500000 + index,
+                location='Lagos',
+                status=Property.Status.PUBLISHED,
+                is_published=True,
+            )
+            for index in range(11)
+        ]
+        self.client_user.saved_listings.add(self.listing, *extra_listings)
+        Enquiry.objects.bulk_create([
+            Enquiry(
+                property=self.listing,
+                client=self.client_user,
+                name='Dashboard Client',
+                email='dashboard@example.com',
+                message=f'Enquiry {index}',
+            )
+            for index in range(21)
+        ])
+        self.client.force_authenticate(user=self.client_user)
+
+        dashboard = self.client.get(reverse('client-dashboard-api'))
+
+        self.assertEqual(dashboard.status_code, status.HTTP_200_OK)
+        self.assertEqual(dashboard.data['overview']['saved_properties'], 12)
+        self.assertEqual(dashboard.data['overview']['total_enquiries'], 21)
+        self.assertEqual(dashboard.data['overview']['active_enquiries'], 21)
+        self.assertEqual(len(dashboard.data['saved_listings']), 10)
+        self.assertEqual(len(dashboard.data['enquiries']), 20)
 
     def test_agent_can_update_assigned_enquiry_and_filter_by_status(self):
         enquiry = Enquiry.objects.create(
