@@ -38,7 +38,11 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
     fetch("/api/auth/session")
       .then(async (response) => {
         const data = await response.json();
-        if (!response.ok || !data.user) {
+        if (response.ok && data.user?.role === "AGENT") {
+          router.replace("/agent");
+          return;
+        }
+        if (!response.ok || !data.user || data.user.role !== "CLIENT") {
           router.replace(`/login?next=${encodeURIComponent(pathname)}`);
           return;
         }

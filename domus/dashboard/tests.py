@@ -50,6 +50,7 @@ class DashboardAndEnquiryTests(APITestCase):
         self.assertEqual(dashboard.data['overview']['published_listings'], 1)
         self.assertEqual(dashboard.data['overview']['total_enquiries'], 1)
         self.assertEqual(dashboard.data['overview']['new_enquiries'], 1)
+        self.assertEqual(dashboard.data['properties'][0]['status'], Property.Status.PUBLISHED)
 
     def test_authenticated_client_enquiry_is_in_client_history(self):
         self.client.force_authenticate(user=self.client_user)
@@ -144,3 +145,53 @@ class DashboardAndEnquiryTests(APITestCase):
         })
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_agent_listing_endpoint_supports_status_search_and_ordering(self):
+        matching = Property.objects.create(
+            title='Garden Apartment',
+            description='Bright apartment',
+            price=700000,
+            location='Abuja',
+            agent=self.agent,
+            status=Property.Status.DRAFT,
+        )
+        Property.objects.create(
+            title='Garden House',
+            description='A house',
+            price=900000,
+            location='Lagos',
+            agent=self.agent,
+            status=Property.Status.PENDING_REVIEW,
+        )
+        self.client.force_authenticate(user=self.agent)
+
+        response = self.client.get(
+            reverse('agent-listing-list'),
+            {'status': Property.Status.DRAFT, 'search': 'Apartment', 'ordering': 'price'},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.data['results'][0]['id'], matching.pk)
+
+    def test_agent_creates_draft_and_submits_it_for_moderation(self):
+        self.client.force_authenticate(user=self.agent)
+
+        created = self.client.post(reverse('agent-listing-list'), {
+            'title': 'New Agent Listing',
+            'description': 'A listing created by an agent.',
+            'price': '650000',
+            'location': 'Abuja',
+        })
+
+        self.assertEqual(created.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(created.data['status'], Property.Status.DRAFT)
+        self.assertFalse(created.data['is_published'])
+
+        submitted = self.client.post(
+            reverse('agent-listing-submit', kwargs={'pk': created.data['id']})
+        )
+
+        self.assertEqual(submitted.status_code, status.HTTP_200_OK)
+        self.assertEqual(submitted.data['status'], Property.Status.PENDING_REVIEW)
+        self.assertFalse(submitted.data['is_published'])

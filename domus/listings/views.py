@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets, permissions, generics
+from rest_framework import filters, viewsets, permissions, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
@@ -25,6 +25,11 @@ class IsAgentAndOwner(permissions.BasePermission):
 class AgentListingViewSet(viewsets.ModelViewSet):
     serializer_class = PropertySerializers
     permission_classes = [permissions.IsAuthenticated, IsAgentAndOwner]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['status', 'listing_type', 'property_type', 'city']
+    search_fields = ['title', 'description', 'location', 'address', 'city', 'postcode', 'reference_number']
+    ordering_fields = ['created_at', 'updated_at', 'price', 'title']
+    ordering = ['-created_at', '-pk']
 
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False):

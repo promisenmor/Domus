@@ -6,7 +6,7 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from account.models import User
 from listings.models import Property, Enquiry
 from account.serializers import UserProfileSerializer
-from listings.serializers import PublicPropertySerializer
+from listings.serializers import PropertySerializers, PublicPropertySerializer
 
 
 class AgentDashboardView(APIView):
@@ -35,7 +35,7 @@ class AgentDashboardView(APIView):
                 "total_enquiries": enquiries.count(),
                 "new_enquiries": enquiries.filter(status=Enquiry.Status.NEW).count(),
             },
-            "properties": PublicPropertySerializer(
+            "properties": PropertySerializers(
                 listings.order_by('-created_at', '-pk')[:10],
                 many=True,
                 context={'request': request},

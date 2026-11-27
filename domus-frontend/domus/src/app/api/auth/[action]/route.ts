@@ -54,8 +54,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const user = await userResponse.json();
-  if (user.role !== "CLIENT") {
-    const response = jsonError("This area is for client accounts.", 403);
+  if (!["CLIENT", "AGENT"].includes(user.role)) {
+    const response = jsonError("This account cannot access the frontend portal.", 403);
     clearAuthCookies(response);
     return response;
   }
@@ -97,8 +97,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const profile = await fetchCurrentUser(tokens.access);
     if (!profile.ok) return jsonError(await readBackendError(profile), profile.status);
     const user = await profile.json();
-    if (user.role !== "CLIENT") {
-      return jsonError("This sign-in page is for client accounts.", 403);
+    if (!["CLIENT", "AGENT"].includes(user.role)) {
+      return jsonError("This account cannot access the frontend portal.", 403);
     }
 
     const response = NextResponse.json({ user });

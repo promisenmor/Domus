@@ -13,8 +13,7 @@ type AuthPanelProps = {
   token?: string;
 };
 
-async function responseMessage(response: Response) {
-  const data: unknown = await response.json().catch(() => null);
+function payloadMessage(data: unknown, ok: boolean) {
   if (typeof data === "object" && data !== null) {
     const values = Object.values(data);
     const text = values.flatMap((value) => Array.isArray(value) ? value : [value])
@@ -22,7 +21,12 @@ async function responseMessage(response: Response) {
       .join(" ");
     if (text) return text;
   }
-  return response.ok ? "Request completed." : "We couldn't complete that request. Please try again.";
+  return ok ? "Request completed." : "We couldn't complete that request. Please try again.";
+}
+
+async function responseMessage(response: Response) {
+  const data: unknown = await response.json().catch(() => null);
+  return payloadMessage(data, response.ok);
 }
 
 const headings: Record<AuthMode, { title: string; description: string }> = {
@@ -79,16 +83,33 @@ export function AuthPanel({ mode, uid, token }: AuthPanelProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (mode === "login") {
+        const loginResult: unknown = await response.json().catch(() => null);
+        if (!response.ok) {
+          setError(payloadMessage(loginResult, false));
+          return;
+        }
+        const destination =
+          typeof loginResult === "object" &&
+          loginResult !== null &&
+          "user" in loginResult &&
+          typeof loginResult.user === "object" &&
+          loginResult.user !== null &&
+          "role" in loginResult.user &&
+          loginResult.user.role === "AGENT"
+            ? "/agent"
+            : "/account";
+        router.push(destination);
+        router.refresh();
+        return;
+      }
       const result = await responseMessage(response);
       if (!response.ok) {
         setError(result);
         return;
       }
 
-      if (mode === "login") {
-        router.push("/account");
-        router.refresh();
-      } else if (mode === "register") {
+      if (mode === "register") {
         setEmail(String(values.email));
         setMessage("Your account is ready. Check your inbox for the verification link before signing in.");
       } else if (mode === "forgot") {

@@ -1178,6 +1178,14 @@ Deliverables:
 
 **Outcome:** Agents can manage their properties and prospective clients.
 
+The Phase 3 frontend includes role-aware agent sign-in, a protected agent workspace,
+dashboard metrics and recent activity, searchable/filterable/sortable listing management,
+listing create/edit forms with separately uploaded and ordered property images, review
+submission, enquiry status/internal-note/follow-up management, and editable agent profiles.
+Agent requests use the same-origin Next.js API proxy and HttpOnly auth cookies used by the
+client portal. Agents can save drafts and submit them for moderation; publishing and other
+moderation decisions remain backend-controlled.
+
 ## Phase 4 — CMS and Administrative Enhancements
 
 Deliverables:
